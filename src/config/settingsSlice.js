@@ -42,12 +42,13 @@ const settingsSlice = createSlice({
         },
 
         saveSettings(state, actions) {
-            state = {
-                ...state,
-                ...actions.payload,
+            const new_state = {
+                ...state, 
+                ...actions.payload
             };
 
-            updatePersistentState(state);
+            updatePersistentState(new_state);
+            return new_state;
         },
 
         setConnectionStatus(state, action) {

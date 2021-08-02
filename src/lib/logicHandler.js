@@ -47,20 +47,22 @@ export default function LogicHandler() {
             initializePlayers();
         }
 
-        /** 
-         *  Check whether to load more medias, or not
-         *  get the number of loaded media
-        */
-        const loadedMedia = getLoadedMedia();
-        
-        // Does it need to load media?
-        if(
-            (loadedMedia.length === 0 && playlist.mediaList.length > 0) ||
-            (loadedMedia.length < 2 && playlist.mediaList.length >= 2)) 
-        {
-            /** Load media */
-            loadMedia(loadedMedia);
-        } 
+        if(settings.initialized && settings.connectionStatus === CONNECTION_STATUS.CONNECTED) {
+            /** 
+             *  Check whether to load more medias, or not
+             *  get the number of loaded media
+            */
+            const loadedMedia = getLoadedMedia();
+            
+            // Does it need to load media?
+            if(
+                (loadedMedia.length === 0 && playlist.mediaList.length > 0) ||
+                (loadedMedia.length < 2 && playlist.mediaList.length >= 2)) 
+            {
+                /** Load media */
+                loadMedia(loadedMedia);
+            } 
+        }
 
 
     }, [dispatch, playlist.mediaList, settings]);

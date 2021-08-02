@@ -1,4 +1,16 @@
-import { PLAYER_STATE } from "./playlistSlice";
+export const MEDIA_STATE = {
+    MEDIA_LISTED: 0,
+    MEDIA_PLAY: 1,
+    MEDIA_READY: 2,
+    MEDIA_ERR: -1
+}
+
+export const PLAYER_STATE = {
+    STOPPED: 0,
+    PAUSED: 1,
+    PLAYING: 2
+};
+
 
 // mediaList object = {
 //     mediaPath: String

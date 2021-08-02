@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { 
     Modal, 
@@ -26,9 +26,6 @@ import {
 } from '../lib/mediaFunctions';
 
 export default function SettingsModal({onClose, isVisible}) {
-    const [media1State, setMedia1State] = useState();
-    const [media2State, setMedia2State] = useState();
-
     const media1 = useRef();
     const media2 = useRef();
     const scene = useRef();
@@ -38,13 +35,6 @@ export default function SettingsModal({onClose, isVisible}) {
     const dispatch = useDispatch();
     const settings = useSelector(settingsSelector);
 
-    useEffect(() => {
-        // get player source names from settings store
-        const medias = settings.mediaPlayers;
-        setMedia1State(medias.player1);
-        setMedia2State(medias.player2);
-
-    }, [dispatch, settings]);
 
     const handleSave = () => {
         dispatch(saveSettings({
@@ -55,7 +45,7 @@ export default function SettingsModal({onClose, isVisible}) {
             sceneName: scene.current.value,
             serverAddr: serverAddr.current.value,
             pathFolder: pathFolder.current.value,
-            
+
         }));
 
         
@@ -132,7 +122,7 @@ export default function SettingsModal({onClose, isVisible}) {
                         <Dropdown.Item href="#">Another action</Dropdown.Item>
                         <Dropdown.Item href="#">Something else here</Dropdown.Item>
                     </DropdownButton>
-                    <FormControl aria-label="Media 1 Source" ref={media1} defaultValue={media1State} />
+                    <FormControl aria-label="Media 1 Source" ref={media1} defaultValue={settings.mediaPlayers.player1} />
                 </InputGroup>
 
                 {/* Playout 2*/}
@@ -146,7 +136,7 @@ export default function SettingsModal({onClose, isVisible}) {
                         <Dropdown.Item href="#">Another action</Dropdown.Item>
                         <Dropdown.Item href="#">Something else here</Dropdown.Item>
                     </DropdownButton>
-                    <FormControl aria-label="Media 2 Source" ref={media2} defaultValue={media2State} />
+                    <FormControl aria-label="Media 2 Source" ref={media2} defaultValue={settings.mediaPlayers.player2} />
                 </InputGroup>
 
                 {/* Default media folder path */}
