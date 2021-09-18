@@ -7,6 +7,7 @@ import {
     setActivePlayer,
     setOperationStarted,
     setOperationEnd,
+    setMediaDuration,
     PLAYER_STATE,
     MEDIA_STATE,
 } from './../config/playlistSlice';
@@ -21,6 +22,7 @@ import {
     obs, 
     obsLoadMedia,
     obsPlayMedia, 
+    obsGetMediaDuration,
     obsSetPlayerVisibility, 
     obsSetScene, 
     obsStopMediaPlayback 
@@ -118,7 +120,7 @@ export const loadMedia = (loadedMedia = getLoadedMedia()) => {
 
     console.log("DEBUG: LOAD MEDIA", settings.mediaPlayers);
 
-    // Load Media
+    /** Load Media */
 
     // determine the next player to load media into
     const mediaPlayersArr = Object.entries(settings.mediaPlayers);
@@ -143,18 +145,35 @@ export const loadMedia = (loadedMedia = getLoadedMedia()) => {
             console.log("DEBUG: Value of loading MEDIA", mediaPlayersArr[loadInPlayerIndex][1], media.mediaPath);
             obsLoadMedia(mediaPlayersArr[loadInPlayerIndex][1], media.mediaPath);
 
+            // Get media duration
+            obsGetMediaDuration(
+                mediaPlayersArr[loadInPlayerIndex][1], 
+                (duration) => {
+                    console.log("DEBUG: Updating media duration for", i, "with duration", duration);
+                    dispatch(setMediaDuration({
+                        mediaIndex: i,
+                        mediaDuration: duration,
+                    }));
+                }
+            ); // end of obsGetMediaDuration
+
             // update media status on app state
-            dispatch(loadedMediaIntoPlayer({ mediaIndex: i, loadedInPlayer: loadInPlayerIndex + 1 }));
+            dispatch(loadedMediaIntoPlayer({ 
+                mediaIndex: i, 
+                loadedInPlayer: loadInPlayerIndex + 1,
+            }));
 
             // set active player if none is active
             if(playlist.playerActive === 0)
                 dispatch(setActivePlayer(1));
 
-            // setting up for next J-I-C
+            // setting up for next media, J-I-C
             loadInPlayerIndex = findNextPlayerIndex(playlist.playerActive + 1);
             loadedCount++;
         }
-    }
+    } // end of for
+
+
 };
 
 
@@ -221,6 +240,7 @@ export const playMedia = () => {
         endOperation();
 
     }, 3000);
+
 }; // end of play();
 
 

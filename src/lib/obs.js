@@ -81,3 +81,12 @@ export const obsLoadMedia = (sourceName, mediaPath) => {
     //     sourceName
     // })
 };
+
+
+export const obsGetMediaDuration = (sourceName, callback) => {
+    obs.send("GetMediaDuration", {
+        sourceName: sourceName
+    }).then((res) => {
+        callback(res.mediaDuration);
+    });
+};
