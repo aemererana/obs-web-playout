@@ -44,7 +44,7 @@ export default function AddMediaModal({ isVisible, onClose }) {
                     label="Folder Path"
                     className="mb-3"
                 >
-                    <Form.Control type="text" placeholder="C:\Fakepath\" defaultValue={settings.pathFolder} onChange={onChangeFolderPath} />
+                    <Form.Control type="text" placeholder="C:\FakePath\" defaultValue={settings.pathFolder} onChange={onChangeFolderPath} />
                 </FloatingLabel>
                 
                 <Button variant="primary" className="w-100" onClick={selectMedia}>Select Media</Button>

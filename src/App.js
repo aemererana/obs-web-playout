@@ -17,7 +17,6 @@ function App() {
     // actual rendering
     return (
         <>
-            <Alert />
             <StatusModal isVisible={ settings.connectionStatus === CONNECTION_STATUS.CONNECTING } />
         
             {/** Is the client connected? */
