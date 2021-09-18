@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { defaultPlaylist, MEDIA_STATE, PLAYER_STATE } from './defaultStates';
+import { defaultPlaylist, MEDIA_STATE, PLAYER_STATE, MEDIA_OBJ } from './defaultStates';
 
 // re-export
 export { MEDIA_STATE, PLAYER_STATE };
@@ -39,9 +39,9 @@ const reducerSlice = createSlice({
         addMedia(state, action) {
             console.log("DEBUG: Adding a media to playlist");
             state.mediaList.push({ 
+                ...MEDIA_OBJ,
                 mediaPath: action.payload, 
                 state: MEDIA_STATE.MEDIA_LISTED,
-                loadedInPlayer: 0
             });
 
             updatePersistentData(state);
@@ -66,7 +66,7 @@ const reducerSlice = createSlice({
         },
 
         // loading of media to the source player
-        // @param    action.payload  = { mediaIndex: , loadedInPlayer:  }
+        // @param    action.payload  = { mediaIndex: , loadedInPlayer: , mediaDuration: }
         loadedMediaIntoPlayer(state, action) {
             let currentMedia = state.mediaList[action.payload.mediaIndex];
             
@@ -115,6 +115,16 @@ const reducerSlice = createSlice({
 
         setOperationEnd(state) {
             state.bOperation = false;            
+        },
+
+        setMediaDuration(state, action) {
+            let currentMedia = state.mediaList[action.payload.mediaIndex];
+            
+            // update media duration
+            state.mediaList[action.payload.mediaIndex] = {
+                ...currentMedia,
+                duration: action.payload.mediaDuration,
+            };
         }
 
 
@@ -136,6 +146,7 @@ export const {
     setActivePlayer,
     setOperationStarted,
     setOperationEnd,
+    setMediaDuration,
 } = reducerSlice.actions;
 
 

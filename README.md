@@ -9,7 +9,8 @@ https://obs-web-playout.pages.dev/
 ### Features
 
 - React based; therefore, it can be used on any modern browser
-- works best if used locally
+- Works best if used locally
+
 
 ### Instructions
 
@@ -26,3 +27,7 @@ https://obs-web-playout.pages.dev/
 
 
 \* *Since browsers do not support giving the full path of the files to web pages, the folder path containing the media must be manually put in.*
+
+### TODO
+- Media scenes are switched with current selected transition; add a setting with transition override
+- Add media playback time

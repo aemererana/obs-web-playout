@@ -2,7 +2,7 @@ import React from 'react';
 
 // sub components
 import StatusModal from './Sections/components/connectionModal';
-import Alert from './Sections/components/alertComponent';
+// import Alert from './Sections/components/alertComponent';
 import Playlist from './Sections/playlistComponent';
 import MediaControls from './Sections/mediaControls';
 import LogicHandler from './lib/logicHandler';
@@ -17,7 +17,6 @@ function App() {
     // actual rendering
     return (
         <>
-            <Alert />
             <StatusModal isVisible={ settings.connectionStatus === CONNECTION_STATUS.CONNECTING } />
         
             {/** Is the client connected? */

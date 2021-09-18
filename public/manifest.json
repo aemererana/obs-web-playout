@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "obs-web-playout",
+  "name": "Web app compianion to OBS and OBS-websocket",
   "icons": [
     {
       "src": "favicon.ico",

@@ -27,6 +27,7 @@ export default function AddMediaModal({ isVisible, onClose }) {
         onClose();
     };
 
+    // TODO: remove this perhaps?
     const onChangeFolderPath = () => {
         dispatch()
     };
