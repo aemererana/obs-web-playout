@@ -31,7 +31,7 @@ export const obsStopMediaPlayback = (sceneName, playersArr) => {
         });
     }
 
-    obsSetScene(sceneName);
+    //obsSetScene(sceneName);
 };
 
 
@@ -46,35 +46,48 @@ export const obsSetPlayerVisibility = (sceneName, playerSource, bVisible) => {
 
 export const obsSetScene = (sceneName) => {
     // TODO: replace with transition override
+    console.log("DEBUG: DEPRECATED obsSetScene CALLED!");
     obs.send("SetCurrentScene", {
         "scene-name": sceneName,
     });
 };
+
 
 
 export const obsPlayMedia = (sceneName, playerSource) => {
     // set the visibility of the source name
     obsSetPlayerVisibility(sceneName, playerSource, true);
+    
 
-    // TODO: replace with transition override
-    obs.send("SetCurrentScene", {
-        "scene-name": sceneName,
+    console.log("DEBUG: MEDIA PLAY OPERATION");
+    obs.send("RestartMedia", {
+         sourceName: playerSource,
     });
-};
 
+    // obsSetScene(sceneName);
+};
 
 
 
 
 
 export const obsLoadMedia = (sourceName, mediaPath) => {
+
     obs.send("SetSourceSettings", { 
-        sourceName: sourceName, 
+        sourceName, 
         sourceSettings: {
             local_file: mediaPath, 
+            restart_on_activate: false,
         } 
     });
+    
+    setTimeout(
+    () => {
+        obs.send("StopMedia", {
+            sourceName,
+        });
 
+    }, 300);
     // obs.send("RestartMedia", {
     //     sourceName
     // })

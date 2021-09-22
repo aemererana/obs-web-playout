@@ -6,6 +6,7 @@ import React, { useEffect } from 'react';
 
 // React-redux
 import { useDispatch, useSelector } from 'react-redux';
+import { PLAYER_STATE } from '../config/defaultStates';
 import { CONNECTION_STATUS } from '../config/settingsSlice';
 import store from './../config/reduxStore';
 
@@ -26,7 +27,7 @@ obs.on('MediaEnded', data => {
     // call the media handler function
     const { playlist } = store.getState();
 
-    if (!playlist.bOperation) {
+    if (!playlist.bOperation && playlist.playerState === PLAYER_STATE.PLAYING) {
         startOperation();
         onMediaEndHandler(data)
     } else {

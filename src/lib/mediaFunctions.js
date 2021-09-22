@@ -242,12 +242,6 @@ export const playMedia = () => {
     if(playlist.mediaList.length > i)
         dispatch(setMediaPlaying(i));
 
-    // end operation lock
-    setTimeout(() => {
-        endOperation();
-
-    }, 3000);
-
 }; // end of play();
 
 
@@ -303,9 +297,12 @@ export const onMediaEndHandler = (data) => {
     console.log("DEBUG: The OnEndHandler has been called------------------------------------");
     const { settings, playlist } = store.getState();
 
+    // get is part of playout?
+    let playerIndx = 0;
     let isPlayoutSource = false;
     const mediaPlayersArr = Object.entries(settings.mediaPlayers);
     for(const [, v] of mediaPlayersArr) {
+        playerIndx++;
         if(data.sourceName === v) {
             isPlayoutSource = true;
             break;
@@ -313,7 +310,10 @@ export const onMediaEndHandler = (data) => {
     }
 
     // the media that ended is part of the playout player??
-    if(isPlayoutSource && playlist.playerState === PLAYER_STATE.PLAYING) {
+    if( isPlayoutSource && 
+        playlist.playerState === PLAYER_STATE.PLAYING &&
+        playlist.playerActive === playerIndx 
+    ) {
         // if it is, next or check media
 
         // update redux's active player
@@ -327,13 +327,19 @@ export const onMediaEndHandler = (data) => {
         // hide the player and switch scene immediately
         console.log("DEBUG: VISIBILITY SWITCH OFF Scene: ", settings.sceneName, " Source: ", data.sourceName);
         obsSetPlayerVisibility(settings.sceneName, data.sourceName, false);
-        obsSetScene(settings.sceneName);
+        // obsSetScene(settings.sceneName);
         
         
         dispatch(removeMedia(0));
         playMedia();
         
     }
+
+    // end operation lock
+    setTimeout(() => {
+        endOperation();
+
+    }, 1000);
 };
 
 
