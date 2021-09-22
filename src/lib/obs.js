@@ -31,10 +31,7 @@ export const obsStopMediaPlayback = (sceneName, playersArr) => {
         });
     }
 
-    // TODO: replace with transition override
-    obs.send("SetCurrentScene", {
-        "scene-name": sceneName,
-    });
+    obsSetScene(sceneName);
 };
 
 
@@ -52,7 +49,7 @@ export const obsSetScene = (sceneName) => {
     obs.send("SetCurrentScene", {
         "scene-name": sceneName,
     });
-}
+};
 
 
 export const obsPlayMedia = (sceneName, playerSource) => {
@@ -64,6 +61,7 @@ export const obsPlayMedia = (sceneName, playerSource) => {
         "scene-name": sceneName,
     });
 };
+
 
 
 
@@ -88,5 +86,13 @@ export const obsGetMediaDuration = (sourceName, callback) => {
         sourceName: sourceName
     }).then((res) => {
         callback(res.mediaDuration);
+    });
+};
+
+export const obsGetMediaTime = (sourceName, callback) => {
+    obs.send("GetMediaTime", {
+        sourceName
+    }).then((res) => {
+        callback(res.timestamp);
     });
 };

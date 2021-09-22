@@ -8,6 +8,7 @@ import {
     setOperationStarted,
     setOperationEnd,
     setMediaDuration,
+    setMediaTime,
     PLAYER_STATE,
     MEDIA_STATE,
 } from './../config/playlistSlice';
@@ -22,10 +23,11 @@ import {
     obs, 
     obsLoadMedia,
     obsPlayMedia, 
-    obsGetMediaDuration,
     obsSetPlayerVisibility, 
     obsSetScene, 
-    obsStopMediaPlayback 
+    obsStopMediaPlayback ,
+    obsGetMediaDuration,
+    obsGetMediaTime,
 } from './obs';
 
 const dispatch = store.dispatch;
@@ -143,19 +145,19 @@ export const loadMedia = (loadedMedia = getLoadedMedia()) => {
             // sourceName = mediaPlayersArr[mediaPlayerIndex][1];
             // media.mediaPath,
             console.log("DEBUG: Value of loading MEDIA", mediaPlayersArr[loadInPlayerIndex][1], media.mediaPath);
-            obsLoadMedia(mediaPlayersArr[loadInPlayerIndex][1], media.mediaPath);
+            
+            const sourceName = mediaPlayersArr[loadInPlayerIndex][1];
+            obsLoadMedia(sourceName, media.mediaPath);
 
-            // Get media duration
-            obsGetMediaDuration(
-                mediaPlayersArr[loadInPlayerIndex][1], 
-                (duration) => {
-                    console.log("DEBUG: Updating media duration for", i, "with duration", duration);
+            // wait a bit before sending get duration
+            setTimeout(() => {
+                obsGetMediaDuration(sourceName, (duration) => {
                     dispatch(setMediaDuration({
                         mediaIndex: i,
-                        mediaDuration: duration,
-                    }));
-                }
-            ); // end of obsGetMediaDuration
+                        mediaDuration: duration
+                    }))
+                })
+            }, 300);
 
             // update media status on app state
             dispatch(loadedMediaIntoPlayer({ 
@@ -221,6 +223,11 @@ export const playMedia = () => {
     obsPlayMedia(settings.sceneName, playerSource);
 
     /** Update media status on the application */
+
+    setTimeout(() => {
+        updatePlaybackTime(playlist.playerActive, playerSource);
+    }, 300);
+
     // getting the index of the media from the playlist
     i = 0;
     for (const media of playlist.mediaList) {
@@ -242,6 +249,27 @@ export const playMedia = () => {
     }, 3000);
 
 }; // end of play();
+
+
+const updatePlaybackTime = async (mediaPlayer, sourceName) => {
+    const { playlist } = store.getState();
+    if(playlist.playerActive === mediaPlayer) {
+        // TODO: Get them playback time
+        obsGetMediaTime(
+            sourceName, 
+            (timestamp) => {
+                dispatch(setMediaTime({
+                    mediaIndex: 0,
+                    mediaTime: timestamp,
+                }));
+            }
+        );
+        
+        setTimeout(() => {
+            updatePlaybackTime(mediaPlayer, sourceName);
+        }, 100);
+    }
+};
 
 
 /**

@@ -125,6 +125,16 @@ const reducerSlice = createSlice({
                 ...currentMedia,
                 duration: action.payload.mediaDuration,
             };
+        },
+
+        setMediaTime(state, action) {
+            let currentMedia = state.mediaList[action.payload.mediaIndex];
+            
+            // update media duration
+            state.mediaList[action.payload.mediaIndex] = {
+                ...currentMedia,
+                time: action.payload.mediaTime,
+            };
         }
 
 
@@ -147,6 +157,7 @@ export const {
     setOperationStarted,
     setOperationEnd,
     setMediaDuration,
+    setMediaTime,
 } = reducerSlice.actions;
 
 
