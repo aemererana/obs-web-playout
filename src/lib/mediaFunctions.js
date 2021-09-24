@@ -205,6 +205,7 @@ export const playMedia = () => {
     }
 
     console.log("DEBUG: PLAY OPERATION BEGINS Active Player:", playlist.playerActive);
+    
     // get the active player's source name
     let playerSource = "";
     let i = 0;
@@ -254,7 +255,8 @@ export const playMedia = () => {
 const updatePlaybackTime = async (mediaPlayer, sourceName) => {
     const { playlist } = store.getState();
     if(playlist.playerActive === mediaPlayer) {
-        // TODO: Get them playback time
+        
+        // Get the playback time
         obsGetMediaTime(
             sourceName, 
             (timestamp) => {
@@ -268,6 +270,8 @@ const updatePlaybackTime = async (mediaPlayer, sourceName) => {
         setTimeout(() => {
             updatePlaybackTime(mediaPlayer, sourceName);
         }, 100);
+    } else {
+        console.log("DEBUG: END OF UPDATE PLAYBACK TIME!");
     }
 };
 
@@ -339,11 +343,11 @@ export const onMediaEndHandler = (data) => {
 
 
 export const startOperation = () => {
-    console.log("DEBUG: OPERATION STARTS");
+    console.log("~~~~~~~~~DEBUG: OPERATION LOCK START~~~~~~~~~");
     dispatch(setOperationStarted());
 }
 
 export const endOperation = () => {
-    console.log("DEBUG: OPERATION END!!!!!!!!!!!!!!!!!!!!");
+    console.log("~~~~~~~~~DEBUG: OPERATION LOCK END!~~~~~~~~~");
     dispatch(setOperationEnd());
 }
