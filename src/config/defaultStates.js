@@ -2,6 +2,7 @@ export const MEDIA_STATE = {
     MEDIA_LISTED: 0,
     MEDIA_PLAY: 1,
     MEDIA_READY: 2,
+    MEDIA_PAUSED: 3,
     MEDIA_ERR: -1
 }
 

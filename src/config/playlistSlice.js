@@ -94,6 +94,14 @@ const reducerSlice = createSlice({
 
         },
 
+        pausePlayer(state) {
+            state.mediaList[0].state = MEDIA_STATE.MEDIA_PAUSED;
+
+            state.playerState = PLAYER_STATE.PAUSED;
+
+            updatePersistentData(state);
+        },
+
         //@param    action.payload  - index of the media from the playlist which status is being changed
         setMediaPlaying(state, action) {
             state.mediaList[action.payload].state = MEDIA_STATE.MEDIA_PLAY;
@@ -150,6 +158,7 @@ export const {
     removeMedia, 
     setMediaPlaying, 
     stopPlayer,
+    pausePlayer,
     resetPlaylist, 
     loadedMediaIntoPlayer, 
     toggleActivePlayer,

@@ -63,7 +63,12 @@ export const obsPlayMedia = (sceneName, playerSource) => {
 };
 
 
-
+export const obsPauseMedia = (sourceName) => {
+    obs.send("PlayPauseMedia", {
+        sourceName,
+        playPause: true // true for pause
+    });
+}
 
 
 
@@ -74,10 +79,6 @@ export const obsLoadMedia = (sourceName, mediaPath) => {
             local_file: mediaPath, 
         } 
     });
-
-    // obs.send("RestartMedia", {
-    //     sourceName
-    // })
 };
 
 
@@ -96,3 +97,10 @@ export const obsGetMediaTime = (sourceName, callback) => {
         callback(res.timestamp);
     });
 };
+
+export const obsSetMediaTime = (sourceName, timestamp) => {
+    obs.send("SetMediaTime", {
+        sourceName,
+        timestamp
+    });
+}

@@ -2,6 +2,7 @@ import store from './../config/reduxStore';
 import { 
     setMediaPlaying, 
     stopPlayer, 
+    pausePlayer,
     removeMedia,  
     loadedMediaIntoPlayer,
     setActivePlayer,
@@ -28,6 +29,7 @@ import {
     obsStopMediaPlayback ,
     obsGetMediaDuration,
     obsGetMediaTime,
+    obsPauseMedia,
 } from './obs';
 
 const dispatch = store.dispatch;
@@ -220,8 +222,23 @@ export const playMedia = () => {
         i++;
     }
     
-    // obs send command
-    obsPlayMedia(settings.sceneName, playerSource);
+    // Unpausing
+    if(playlist.mediaList[0].time > 0) {
+        obs.send("PlayPauseMedia", {
+            sourceName: playerSource,
+            playPause: false // true for pause
+        });
+
+        // obsSetMediaTime(playerSource, {
+        //     sourceName: playerSource,
+        //     timestamp: playlist.mediaList[0].time
+        // });
+
+    } else {
+        // obs send command
+        obsPlayMedia(settings.sceneName, playerSource);
+    }
+
 
     /** Update media status on the application */
 
@@ -252,6 +269,12 @@ export const playMedia = () => {
 }; // end of play();
 
 
+/**
+ * Updating playback looping function
+ * 
+ * @param {*} mediaPlayer - media player ID
+ * @param {*} sourceName - source name
+ */
 const updatePlaybackTime = async (mediaPlayer, sourceName) => {
     const { playlist } = store.getState();
     if(playlist.playerActive === mediaPlayer) {
@@ -275,6 +298,34 @@ const updatePlaybackTime = async (mediaPlayer, sourceName) => {
     }
 };
 
+
+/**
+ * Pause media function
+ */
+export const pauseMediaPlayer = async () => {
+    const { playlist, settings } = store.getState();
+    
+    if(playlist.playerActive === 0) {
+        // TODO: Add error popup
+        return;
+    }
+
+    console.log("DEBUG: MEDIA IS BEING PAUSED");
+
+    const playersArr = Object.entries(settings.mediaPlayers);
+    // get the current time
+    const sourceName = playersArr[playlist.playerActive-1][1];
+    obsGetMediaDuration(sourceName, (timestamp) => {
+        dispatch(setMediaTime({
+            mediaIndex: 0,
+            mediaTime: timestamp,
+        }));
+    });
+
+    obsPauseMedia(sourceName);
+
+    dispatch(pausePlayer());
+};
 
 /**
  * Funtion that stops the media playback
@@ -310,8 +361,9 @@ export const nextMedia = () => {
     // prepare the next player
     const mediaPlayersArr = Object.entries(settings.mediaPlayers);
 
-    // This means the player is not working
+    // This means the player is not playing
     if(playlist.playerActive === 0) {
+        // TODO: add error pop up
         return;
     }
 

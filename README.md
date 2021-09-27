@@ -31,7 +31,6 @@ https://obs-web-playout.pages.dev/
 
 ### TODO
 - Add set playback time functionality before playing the listed media 
-- Add working Pause functionality
 - Add loop function
 - Add "Manual Scene Override" for live media
 - Add "Are you sure?" confirm before leaving/refreshing page
