@@ -94,6 +94,14 @@ const reducerSlice = createSlice({
 
         },
 
+        pausePlayer(state) {
+            state.mediaList[0].state = MEDIA_STATE.MEDIA_PAUSED;
+
+            state.playerState = PLAYER_STATE.PAUSED;
+
+            updatePersistentData(state);
+        },
+
         //@param    action.payload  - index of the media from the playlist which status is being changed
         setMediaPlaying(state, action) {
             state.mediaList[action.payload].state = MEDIA_STATE.MEDIA_PLAY;
@@ -125,6 +133,16 @@ const reducerSlice = createSlice({
                 ...currentMedia,
                 duration: action.payload.mediaDuration,
             };
+        },
+
+        setMediaTime(state, action) {
+            let currentMedia = state.mediaList[action.payload.mediaIndex];
+            
+            // update media duration
+            state.mediaList[action.payload.mediaIndex] = {
+                ...currentMedia,
+                time: action.payload.mediaTime,
+            };
         }
 
 
@@ -140,6 +158,7 @@ export const {
     removeMedia, 
     setMediaPlaying, 
     stopPlayer,
+    pausePlayer,
     resetPlaylist, 
     loadedMediaIntoPlayer, 
     toggleActivePlayer,
@@ -147,6 +166,7 @@ export const {
     setOperationStarted,
     setOperationEnd,
     setMediaDuration,
+    setMediaTime,
 } = reducerSlice.actions;
 
 

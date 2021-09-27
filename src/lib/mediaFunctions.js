@@ -2,12 +2,14 @@ import store from './../config/reduxStore';
 import { 
     setMediaPlaying, 
     stopPlayer, 
+    pausePlayer,
     removeMedia,  
     loadedMediaIntoPlayer,
     setActivePlayer,
     setOperationStarted,
     setOperationEnd,
     setMediaDuration,
+    setMediaTime,
     PLAYER_STATE,
     MEDIA_STATE,
 } from './../config/playlistSlice';
@@ -22,10 +24,12 @@ import {
     obs, 
     obsLoadMedia,
     obsPlayMedia, 
-    obsGetMediaDuration,
     obsSetPlayerVisibility, 
     obsSetScene, 
-    obsStopMediaPlayback 
+    obsStopMediaPlayback ,
+    obsGetMediaDuration,
+    obsGetMediaTime,
+    obsPauseMedia,
 } from './obs';
 
 const dispatch = store.dispatch;
@@ -143,19 +147,19 @@ export const loadMedia = (loadedMedia = getLoadedMedia()) => {
             // sourceName = mediaPlayersArr[mediaPlayerIndex][1];
             // media.mediaPath,
             console.log("DEBUG: Value of loading MEDIA", mediaPlayersArr[loadInPlayerIndex][1], media.mediaPath);
-            obsLoadMedia(mediaPlayersArr[loadInPlayerIndex][1], media.mediaPath);
+            
+            const sourceName = mediaPlayersArr[loadInPlayerIndex][1];
+            obsLoadMedia(sourceName, media.mediaPath);
 
-            // Get media duration
-            obsGetMediaDuration(
-                mediaPlayersArr[loadInPlayerIndex][1], 
-                (duration) => {
-                    console.log("DEBUG: Updating media duration for", i, "with duration", duration);
+            // wait a bit before sending get duration
+            setTimeout(() => {
+                obsGetMediaDuration(sourceName, (duration) => {
                     dispatch(setMediaDuration({
                         mediaIndex: i,
-                        mediaDuration: duration,
-                    }));
-                }
-            ); // end of obsGetMediaDuration
+                        mediaDuration: duration
+                    }))
+                })
+            }, 300);
 
             // update media status on app state
             dispatch(loadedMediaIntoPlayer({ 
@@ -203,6 +207,7 @@ export const playMedia = () => {
     }
 
     console.log("DEBUG: PLAY OPERATION BEGINS Active Player:", playlist.playerActive);
+    
     // get the active player's source name
     let playerSource = "";
     let i = 0;
@@ -217,10 +222,30 @@ export const playMedia = () => {
         i++;
     }
     
-    // obs send command
-    obsPlayMedia(settings.sceneName, playerSource);
+    // Unpausing
+    if(playlist.mediaList[0].time > 0) {
+        obs.send("PlayPauseMedia", {
+            sourceName: playerSource,
+            playPause: false // true for pause
+        });
+
+        // obsSetMediaTime(playerSource, {
+        //     sourceName: playerSource,
+        //     timestamp: playlist.mediaList[0].time
+        // });
+
+    } else {
+        // obs send command
+        obsPlayMedia(settings.sceneName, playerSource);
+    }
+
 
     /** Update media status on the application */
+
+    setTimeout(() => {
+        updatePlaybackTime(playlist.playerActive, playerSource);
+    }, 300);
+
     // getting the index of the media from the playlist
     i = 0;
     for (const media of playlist.mediaList) {
@@ -239,10 +264,68 @@ export const playMedia = () => {
     setTimeout(() => {
         endOperation();
 
-    }, 3000);
+    }, 1000);
 
 }; // end of play();
 
+
+/**
+ * Updating playback looping function
+ * 
+ * @param {*} mediaPlayer - media player ID
+ * @param {*} sourceName - source name
+ */
+const updatePlaybackTime = async (mediaPlayer, sourceName) => {
+    const { playlist } = store.getState();
+    if(playlist.playerActive === mediaPlayer) {
+        
+        // Get the playback time
+        obsGetMediaTime(
+            sourceName, 
+            (timestamp) => {
+                dispatch(setMediaTime({
+                    mediaIndex: 0,
+                    mediaTime: timestamp,
+                }));
+            }
+        );
+        
+        setTimeout(() => {
+            updatePlaybackTime(mediaPlayer, sourceName);
+        }, 100);
+    } else {
+        console.log("DEBUG: END OF UPDATE PLAYBACK TIME!");
+    }
+};
+
+
+/**
+ * Pause media function
+ */
+export const pauseMediaPlayer = async () => {
+    const { playlist, settings } = store.getState();
+    
+    if(playlist.playerActive === 0) {
+        // TODO: Add error popup
+        return;
+    }
+
+    console.log("DEBUG: MEDIA IS BEING PAUSED");
+
+    const playersArr = Object.entries(settings.mediaPlayers);
+    // get the current time
+    const sourceName = playersArr[playlist.playerActive-1][1];
+    obsGetMediaDuration(sourceName, (timestamp) => {
+        dispatch(setMediaTime({
+            mediaIndex: 0,
+            mediaTime: timestamp,
+        }));
+    });
+
+    obsPauseMedia(sourceName);
+
+    dispatch(pausePlayer());
+};
 
 /**
  * Funtion that stops the media playback
@@ -267,9 +350,47 @@ export const stopMedia = () => {
 
 
 /**
+ * Function to skip media on the playlist
+ */
+export const nextMedia = () => {
+    // lock operation
+    startOperation();
+
+    const { playlist, settings } = store.getState();
+
+    // prepare the next player
+    const mediaPlayersArr = Object.entries(settings.mediaPlayers);
+
+    // This means the player is not playing
+    if(playlist.playerActive === 0) {
+        // TODO: add error pop up
+        return;
+    }
+
+    // set the current play disabled
+    obsSetPlayerVisibility(settings.sceneName, mediaPlayersArr[playlist.playerActive-1][1], false);
+
+    // update redux's active player
+    let newPlayer = (playlist.playerActive + 1) > mediaPlayersArr.length ? 
+    (playlist.playerActive + 1) % mediaPlayersArr.length :
+    playlist.playerActive + 1;
+
+    dispatch(setActivePlayer(newPlayer));
+
+
+    obsSetScene(settings.sceneName);
+
+    // remove the finished media from the playlist.
+    dispatch(removeMedia(0));
+
+    playMedia();
+}
+
+
+/**
  * Callback handler for the event that OBS will send
  * 
- * @param {*} data 
+ * @param {*} data resulting object of obs MediaEnded Event
  */
 export const onMediaEndHandler = (data) => {
     console.log("DEBUG: The OnEndHandler has been called------------------------------------");
@@ -294,7 +415,6 @@ export const onMediaEndHandler = (data) => {
             playlist.playerActive + 1;
 
         dispatch(setActivePlayer(newPlayer));
-        // remove the finished media from the playlist.
         
         // hide the player and switch scene immediately
         console.log("DEBUG: VISIBILITY SWITCH OFF Scene: ", settings.sceneName, " Source: ", data.sourceName);
@@ -302,7 +422,9 @@ export const onMediaEndHandler = (data) => {
         obsSetScene(settings.sceneName);
         
         
+        // remove the finished media from the playlist.
         dispatch(removeMedia(0));
+
         playMedia();
         
     }
@@ -311,11 +433,11 @@ export const onMediaEndHandler = (data) => {
 
 
 export const startOperation = () => {
-    console.log("DEBUG: OPERATION STARTS");
+    console.log("~~~~~~~~~DEBUG: OPERATION LOCK START~~~~~~~~~");
     dispatch(setOperationStarted());
 }
 
 export const endOperation = () => {
-    console.log("DEBUG: OPERATION END!!!!!!!!!!!!!!!!!!!!");
+    console.log("~~~~~~~~~DEBUG: OPERATION LOCK END!~~~~~~~~~");
     dispatch(setOperationEnd());
 }
