@@ -247,7 +247,7 @@ export const playMedia = () => {
     setTimeout(() => {
         endOperation();
 
-    }, 3000);
+    }, 1000);
 
 }; // end of play();
 
@@ -299,9 +299,46 @@ export const stopMedia = () => {
 
 
 /**
+ * Function to skip media on the playlist
+ */
+export const nextMedia = () => {
+    // lock operation
+    startOperation();
+
+    const { playlist, settings } = store.getState();
+
+    // prepare the next player
+    const mediaPlayersArr = Object.entries(settings.mediaPlayers);
+
+    // This means the player is not working
+    if(playlist.playerActive === 0) {
+        return;
+    }
+
+    // set the current play disabled
+    obsSetPlayerVisibility(settings.sceneName, mediaPlayersArr[playlist.playerActive-1][1], false);
+
+    // update redux's active player
+    let newPlayer = (playlist.playerActive + 1) > mediaPlayersArr.length ? 
+    (playlist.playerActive + 1) % mediaPlayersArr.length :
+    playlist.playerActive + 1;
+
+    dispatch(setActivePlayer(newPlayer));
+
+
+    obsSetScene(settings.sceneName);
+
+    // remove the finished media from the playlist.
+    dispatch(removeMedia(0));
+
+    playMedia();
+}
+
+
+/**
  * Callback handler for the event that OBS will send
  * 
- * @param {*} data 
+ * @param {*} data resulting object of obs MediaEnded Event
  */
 export const onMediaEndHandler = (data) => {
     console.log("DEBUG: The OnEndHandler has been called------------------------------------");
@@ -326,7 +363,6 @@ export const onMediaEndHandler = (data) => {
             playlist.playerActive + 1;
 
         dispatch(setActivePlayer(newPlayer));
-        // remove the finished media from the playlist.
         
         // hide the player and switch scene immediately
         console.log("DEBUG: VISIBILITY SWITCH OFF Scene: ", settings.sceneName, " Source: ", data.sourceName);
@@ -334,7 +370,9 @@ export const onMediaEndHandler = (data) => {
         obsSetScene(settings.sceneName);
         
         
+        // remove the finished media from the playlist.
         dispatch(removeMedia(0));
+
         playMedia();
         
     }
