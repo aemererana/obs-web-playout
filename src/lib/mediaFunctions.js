@@ -223,7 +223,7 @@ export const playMedia = () => {
     }
     
     // Unpausing
-    if(playlist.mediaList[0].time > 0) {
+    if(playlist.mediaList[0].state === MEDIA_STATE.MEDIA_PAUSED) {
         obs.send("PlayPauseMedia", {
             sourceName: playerSource,
             playPause: false // true for pause

@@ -47,8 +47,10 @@ export default function MediaItem({ media }) {
             <div className="card-body">
                 <h5 className="card-title">{media.mediaPath}</h5>
                 <div className="card-text">
-                    {msg}
-                    {(media.state === MEDIA_STATE.MEDIA_READY || media.state === MEDIA_STATE.MEDIA_PLAY || media.state === MEDIA_STATE.MEDIA_PAUSED) &&
+                    <p className="m-0">{msg}</p>
+                    {(media.state === MEDIA_STATE.MEDIA_READY || 
+                        media.state === MEDIA_STATE.MEDIA_PLAY || 
+                        media.state === MEDIA_STATE.MEDIA_PAUSED) &&
                         <p className="font-monospace m-0">{getStrTime(media.time)} / {getStrTime(media.duration)} - Remaining: {getStrTime(media.duration - media.time)}</p>
                     }
                 </div>
