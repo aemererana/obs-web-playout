@@ -87,6 +87,7 @@ const reducerSlice = createSlice({
             // put any media to stop playing
             for(let i = 0; i < state.mediaList.length; i++) {
                 state.mediaList[i].loadedInPlayer = 0;
+                state.mediaList[i].time = 0;
                 state.mediaList[i].state = MEDIA_STATE.MEDIA_LISTED;
             } 
 
