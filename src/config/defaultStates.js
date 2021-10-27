@@ -3,6 +3,7 @@ export const MEDIA_STATE = {
     MEDIA_PLAY: 1,
     MEDIA_READY: 2,
     MEDIA_PAUSED: 3,
+    MEDIA_START_TIMED: 4,
     MEDIA_ERR: -1
 }
 

@@ -136,14 +136,41 @@ const reducerSlice = createSlice({
             };
         },
 
+        /**
+         *  action for updating the current media time 
+         *  when being played.
+         * 
+         * @param {*} state - current state
+         * @param {*} action - payload carrier
+         */
         setMediaTime(state, action) {
             let currentMedia = state.mediaList[action.payload.mediaIndex];
             
-            // update media duration
+            // update media time
             state.mediaList[action.payload.mediaIndex] = {
                 ...currentMedia,
                 time: action.payload.mediaTime,
             };
+        },
+
+        /**
+         *  Action for setting a media to start at
+         *  a certain timeplay
+         * 
+         * @param {*} state - current state
+         * @param {*} action - payload carrier
+         */
+        setMediaStartTime(state, action) {
+            let currentMedia = state.mediaList[action.payload.mediaIndex];
+
+            // update media time
+            state.mediaList[action.payload.mediaIndex] = {
+                ...currentMedia,
+                state: MEDIA_STATE.MEDIA_START_TIMED,
+                time: action.payload.mediaTime,
+            };
+
+            updatePersistentData(state);
         }
 
 
@@ -168,6 +195,7 @@ export const {
     setOperationEnd,
     setMediaDuration,
     setMediaTime,
+    setMediaStartTime,
 } = reducerSlice.actions;
 
 

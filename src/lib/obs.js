@@ -52,14 +52,31 @@ export const obsSetScene = (sceneName) => {
 };
 
 
-export const obsPlayMedia = (sceneName, playerSource) => {
-    // set the visibility of the source name
-    obsSetPlayerVisibility(sceneName, playerSource, true);
+export const obsPlayMedia = (sceneName, playerSource, isTimed = false) => {
+    if(isTimed) {
+        obsSetPlayerVisibility(sceneName, playerSource, true);
+        // obs.send("ExecuteBatch", {
+        //     requesst: [
+        //         {
+        //             "request-type": ""
+        //         }
+        //     ]
+        // })
+        // blindly restart media to get have the ability to start
+        // on set time
+        obs.send("RestartMedia", {
+            sourceName: playerSource
+        });
 
-    // TODO: replace with transition override
-    obs.send("SetCurrentScene", {
-        "scene-name": sceneName,
-    });
+    } else {
+        // set the visibility of the source name
+        obsSetPlayerVisibility(sceneName, playerSource, true);
+    
+        // TODO: replace with transition override
+        obs.send("SetCurrentScene", {
+            "scene-name": sceneName,
+        });
+    }
 };
 
 
@@ -77,6 +94,7 @@ export const obsLoadMedia = (sourceName, mediaPath) => {
         sourceName: sourceName, 
         sourceSettings: {
             local_file: mediaPath, 
+            restart_on_activate: true
         } 
     });
 };

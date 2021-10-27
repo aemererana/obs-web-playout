@@ -19,7 +19,7 @@ const getStrTime = (ms) => {
         ((msec >= 10) ? 0 : msec);
   }
 
-export default function MediaItem({ media }) {
+export default function MediaItem({ media, showSetMediaTime, idx }) {
     const [isLooped, setLooped] = useState(false);
 
     // determine media status
@@ -32,6 +32,7 @@ export default function MediaItem({ media }) {
             msg = `Playing in Player${media.loadedInPlayer}`;
             break;
         
+        case MEDIA_STATE.MEDIA_START_TIMED:
         case MEDIA_STATE.MEDIA_PAUSED:
         case MEDIA_STATE.MEDIA_READY:
             status = "bg-warning";
@@ -61,6 +62,7 @@ export default function MediaItem({ media }) {
                             <div className="card-text">
                                 <p className="m-0">{msg}</p>
                                 {(media.state === MEDIA_STATE.MEDIA_READY ||
+                                    media.state === MEDIA_STATE.MEDIA_START_TIMED ||
                                     media.state === MEDIA_STATE.MEDIA_PLAY ||
                                     media.state === MEDIA_STATE.MEDIA_PAUSED) &&
                                     <p className="font-monospace m-0">{getStrTime(media.time)} / {getStrTime(media.duration)} - Remaining: {getStrTime(media.duration - media.time)}</p>
@@ -69,7 +71,7 @@ export default function MediaItem({ media }) {
                         </Col>
                         <Col sm={12} md={2} className="text-end">
                             {/* Set Playback time button */}
-                            <Button variant="secondary" size="sm" className="me-1 align-top">
+                            <Button variant="secondary" size="sm" className="me-1 align-top" onClick={() => { showSetMediaTime(idx) }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-stopwatch" viewBox="0 0 16 16">
                                     <path d="M8.5 5.6a.5.5 0 1 0-1 0v2.9h-3a.5.5 0 0 0 0 1H8a.5.5 0 0 0 .5-.5V5.6z" />
                                     <path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1v.57c1.36.196 2.594.78 3.584 1.64a.715.715 0 0 1 .012-.013l.354-.354-.354-.353a.5.5 0 0 1 .707-.708l1.414 1.415a.5.5 0 1 1-.707.707l-.353-.354-.354.354a.512.512 0 0 1-.013.012A7 7 0 1 1 7 2.071V1.5a.5.5 0 0 1-.5-.5zM8 3a6 6 0 1 0 .001 12A6 6 0 0 0 8 3z" />

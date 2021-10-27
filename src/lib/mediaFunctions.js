@@ -30,6 +30,7 @@ import {
     obsGetMediaDuration,
     obsGetMediaTime,
     obsPauseMedia,
+    obsSetMediaTime,
 } from './obs';
 
 const dispatch = store.dispatch;
@@ -89,8 +90,9 @@ export const initializePlayers = async () => {
         obsSetPlayerVisibility(settings.sceneName, value, false);
     }
 
+    // update app status
+    dispatch(stopPlayer());
 
-    // TODO: make sure that both sources are not playing
     if(media1Status && media2Status)
         dispatch(initialized());    
     else
@@ -184,7 +186,7 @@ export const loadMedia = (loadedMedia = getLoadedMedia()) => {
 /**
  * Function to play already loaded media from the playlist
  */
-export const playMedia = () => {
+export const playMedia = async () => {
     // get application state
     const { settings, playlist } = store.getState();
 
@@ -229,19 +231,61 @@ export const playMedia = () => {
             playPause: false // true for pause
         });
 
-        // obsSetMediaTime(playerSource, {
-        //     sourceName: playerSource,
-        //     timestamp: playlist.mediaList[0].time
-        // });
+    // timed start
+    } else if(playlist.mediaList[0].state === MEDIA_STATE.MEDIA_START_TIMED) {
+        console.log("DEBUG: TIMED PLAYBACK START");
+        
+        await obs.send("SetSourceSettings", {
+            sourceName: playerSource,
+            sourceSettings: { 
+                restart_on_activate: false
+            } 
+        });
 
+        // pause it there
+        await obs.send("PlayPauseMedia", {
+            sourceName: playerSource,
+            playPause: true // true for pause
+        });
+
+        // setting time
+        console.log("DEBUG: Timed playback setting time", playlist.mediaList[0].time);
+        
+        setTimeout(() => {
+            obsSetMediaTime(playerSource, playlist.mediaList[0].time);
+            obsSetPlayerVisibility(settings.sceneName, playerSource, true);
+            obsSetScene(settings.sceneName);
+            
+            // Unpause
+            obs.send("PlayPauseMedia", {
+                sourceName: playerSource,
+                playPause: false // true for pause
+            });
+
+        }, 50);
+
+        
+
+    
+    // Regular Play
     } else {
         // obs send command
         obsPlayMedia(settings.sceneName, playerSource);
     }
 
+    // if(playlist.mediaList[0].state === MEDIA_STATE.MEDIA_START_TIMED) {
+    //     console.log("DEBUG: TIMED START!!!", playlist.mediaList[0].time);
+    //     //obsSetMediaTime(playerSource, playlist.mediaList[0].time);
+
+    //     setTimeout(() => {
+    //         obsSetMediaTime(playerSource, playlist.mediaList[0].time);
+    //     }, 50);
+    // }
+
 
     /** Update media status on the application */
 
+    // TODO: This code is a bit redundant/inefficient???
     setTimeout(() => {
         updatePlaybackTime(playlist.playerActive, playerSource);
     }, 300);
@@ -277,7 +321,7 @@ export const playMedia = () => {
  */
 const updatePlaybackTime = async (mediaPlayer, sourceName) => {
     const { playlist } = store.getState();
-    if(playlist.playerActive === mediaPlayer) {
+    if(playlist.playerActive === mediaPlayer && playlist.mediaList[0].state === MEDIA_STATE.MEDIA_PLAY) {
         
         // Get the playback time
         obsGetMediaTime(
